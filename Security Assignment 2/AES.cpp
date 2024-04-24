@@ -62,7 +62,6 @@ auto MultiplyMatrix(vector<vector<int>> &a, vector<vector<int>> &b)
                 v[r][c] ^= galois_multiply(a[r][k], b[k][c]);
     return v;
 }
-
 int main()
 {
     initialize();
