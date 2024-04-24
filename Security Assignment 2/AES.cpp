@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
+using namespace std::chrono;
 #define n 4
 vector<int> Sbox, InvSbox, rcon;
 vector<vector<int>> Mixer, InverseMixer, keys;
@@ -115,7 +116,7 @@ vector<vector<int>> makeState(string s)
     vector<vector<int>> v(n, vector<int>(n));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
-            v[j][i] = s[k++];
+            v[j][i] = (int)(unsigned char)s[k++];
     return v;
 }
 vector<vector<int>> Xor(vector<vector<int>> a, vector<vector<int>> b)
@@ -177,16 +178,23 @@ string decrypt(string keyText, string textString)
 int main()
 {
     initialize();
-    string key = "Thats my Kung Fu";
-    string plaintext = "Two One Nine Two";
+    string key;
+    string plaintext;
+    getline(cin, key);
+    getline(cin, plaintext);
     expandKeys(makeState(key));
-    cout << decrypt(key, encrypt(key, plaintext)) << "\n";
-    // string cipherText = encrypt(key, plaintext);
-    // cout << cipherText << "\n";
-    // for (auto c : cipherText)
-    //     cout << hex << (int)(unsigned char)c;
-    // cout << "\n";
-
+    auto start = high_resolution_clock::now();
+    string cypherText = encrypt(key, plaintext);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << fixed << setprecision(15) << "Time taken: " << duration.count() / 1000.0 << " seconds"
+         << "\n";
+    start = high_resolution_clock::now();
+    string again_plainText = decrypt(key, cypherText);
+    stop = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(stop - start);
+    cout << fixed << setprecision(15) << "Time taken: " << duration.count() / 1000.0 << " seconds"
+         << "\n";
     return 0;
 }
 
