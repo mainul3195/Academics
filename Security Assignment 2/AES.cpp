@@ -1,9 +1,46 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define n 4
-vector<int> Sbox, InvSbox;
-vector<vector<int>> Mixer, InverseMixer;
+vector<int> Sbox, InvSbox, rcon;
+vector<vector<int>> Mixer, InverseMixer, keys;
 void initialize();
+vector<int> g(vector<int> output, int round)
+{
+    // shift
+    int temp = output[0];
+    for (int i = 0; i < 3; ++i)
+    {
+        output[i] = output[i + 1];
+    }
+    output[3] = temp;
+
+    // subBytes
+    for (int i = 0; i < 4; ++i)
+        output[i] = Sbox[output[i]];
+
+    // add round constant
+    output[0] ^= rcon[round];
+    return output;
+}
+
+vector<int> Xor(vector<int> a, vector<int> b)
+{
+    for (int i = 0; i < n; i++)
+        a[i] ^= b[i];
+    return a;
+}
+void expandKeys(vector<vector<int>> given)
+{
+    for (int i = 0; i < n; i++)
+        keys.push_back({given[0][i], given[1][i], given[2][i], given[3][i]});
+    for (int step = 1; step <= 10; step++)
+    {
+        keys.push_back(Xor(keys[keys.size() - 4], g(keys.back(), step)));
+        for (int i = 0; i < 3; i++)
+            keys.push_back(Xor(keys[keys.size() - 4], keys.back()));
+    }
+    return;
+}
 void subBytes(vector<vector<int>> &v)
 {
     for (auto &a : v)
@@ -56,9 +93,9 @@ int galois_multiply(const unsigned char &a, const unsigned char &c)
 auto MultiplyMatrix(vector<vector<int>> &a, vector<vector<int>> &b)
 {
     vector<vector<int>> v(n, vector<int>(n, 0));
-    for(int r = 0; r<n; r++)
-        for(int c = 0; c<n; c++)
-            for(int k = 0; k<n; k++)
+    for (int r = 0; r < n; r++)
+        for (int c = 0; c < n; c++)
+            for (int k = 0; k < n; k++)
                 v[r][c] ^= galois_multiply(a[r][k], b[k][c]);
     return v;
 }
@@ -71,6 +108,7 @@ int main()
 
 void initialize()
 {
+    rcon = vector<int>{0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
     Mixer = vector<vector<int>>{
         {0x02, 0x03, 0x01, 0x01},
         {0x01, 0x02, 0x03, 0x01},
