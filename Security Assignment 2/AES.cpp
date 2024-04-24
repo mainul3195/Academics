@@ -175,25 +175,63 @@ string decrypt(string keyText, string textString)
             plainText.push_back((char)cur_state[j][i]);
     return plainText;
 }
+void print(string s, string to_print)
+{
+    cout << s << ":\n";
+    cout << "In ASCII: " << to_print << "\n";
+    cout << "In HEX: ";
+    for (auto c : to_print)
+        cout << hex << (int)(unsigned char)c;
+    cout << "\n\n";
+}
 int main()
 {
     initialize();
     string key;
-    string plaintext;
+    string plaintext, cypherText, again_plainText;
     getline(cin, key);
     getline(cin, plaintext);
-    expandKeys(makeState(key));
     auto start = high_resolution_clock::now();
-    string cypherText = encrypt(key, plaintext);
+    while (key.size() > 16)
+        key.pop_back();
+    while (key.size() < 16)
+        key.push_back('Z');
+    expandKeys(makeState(key));
     auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << fixed << setprecision(15) << "Time taken: " << duration.count() / 1000.0 << " seconds"
-         << "\n";
+    auto key_duration = duration_cast<microseconds>(stop - start);
+
     start = high_resolution_clock::now();
-    string again_plainText = decrypt(key, cypherText);
+    for (int i = 0; i < plaintext.size(); i += 16)
+    {
+        string tmp_plainText = plaintext.substr(i, min(16, (int)plaintext.size() - i));
+        while (tmp_plainText.size() < 16)
+            tmp_plainText.push_back((char)5);
+        cypherText += encrypt(key, tmp_plainText);
+    }
     stop = high_resolution_clock::now();
-    duration = duration_cast<microseconds>(stop - start);
-    cout << fixed << setprecision(15) << "Time taken: " << duration.count() / 1000.0 << " seconds"
+    auto encryption_duration = duration_cast<microseconds>(stop - start);
+
+    start = high_resolution_clock::now();
+    for (int i = 0; i < plaintext.size(); i += 16)
+    {
+        string tmp_cypherText = cypherText.substr(i, min(16, (int)cypherText.size() - i));
+        again_plainText += decrypt(key, tmp_cypherText);
+    }
+    stop = high_resolution_clock::now();
+    auto decryption_duration = duration_cast<microseconds>(stop - start);
+    cypherText = cypherText.substr(0, plaintext.size());
+    again_plainText = again_plainText.substr(0, plaintext.size());
+    print("Key", key);
+    print("Plain Text", plaintext);
+    print("Cipher Text", cypherText);
+    print("Decipher Text", again_plainText);
+
+    cout << "Execution Time:\n";
+    cout << fixed << setprecision(15) << "Key Scheduling: " << key_duration.count() / 1000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000.0 << " seconds"
          << "\n";
     return 0;
 }
