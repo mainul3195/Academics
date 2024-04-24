@@ -5,6 +5,75 @@ using namespace std::chrono;
 vector<int> Sbox, InvSbox, rcon;
 vector<vector<int>> Mixer, InverseMixer, keys;
 void initialize();
+vector<int> g(vector<int> output, int round);
+vector<int> Xor(vector<int> a, vector<int> b);
+void expandKeys(vector<vector<int>> given);
+void subBytes(vector<vector<int>> &v);
+void inverseSubBytes(vector<vector<int>> &v);
+void shiftRows(vector<vector<int>> &v);
+void InverseShiftRows(vector<vector<int>> &v);
+int galois_multiply(const unsigned char &a, const unsigned char &c);
+auto MultiplyMatrix(vector<vector<int>> &a, vector<vector<int>> &b);
+void mixCol(vector<vector<int>> &v);
+void inverseMixCol(vector<vector<int>> &v);
+vector<vector<int>> makeState(string s);
+vector<vector<int>> Xor(vector<vector<int>> a, vector<vector<int>> b);
+void addRoundKey(vector<vector<int>> &v, int round);
+string encrypt(string keyText, string textString);
+string decrypt(string keyText, string textString);
+void print(string s, string to_print);
+
+int main()
+{
+    initialize();
+    string key;
+    string plaintext, cypherText, again_plainText;
+    getline(cin, key);
+    getline(cin, plaintext);
+    auto start = high_resolution_clock::now();
+    while (key.size() > 16)
+        key.pop_back();
+    while (key.size() < 16)
+        key.push_back('Z');
+    expandKeys(makeState(key));
+    auto stop = high_resolution_clock::now();
+    auto key_duration = duration_cast<microseconds>(stop - start);
+
+    start = high_resolution_clock::now();
+    for (int i = 0; i < plaintext.size(); i += 16)
+    {
+        string tmp_plainText = plaintext.substr(i, min(16, (int)plaintext.size() - i));
+        while (tmp_plainText.size() < 16)
+            tmp_plainText.push_back('Z');
+        cypherText += encrypt(key, tmp_plainText);
+    }
+    stop = high_resolution_clock::now();
+    auto encryption_duration = duration_cast<microseconds>(stop - start);
+
+    start = high_resolution_clock::now();
+    for (int i = 0; i < plaintext.size(); i += 16)
+    {
+        string tmp_cypherText = cypherText.substr(i, min(16, (int)cypherText.size() - i));
+        again_plainText += decrypt(key, tmp_cypherText);
+    }
+    stop = high_resolution_clock::now();
+    auto decryption_duration = duration_cast<microseconds>(stop - start);
+    cypherText = cypherText.substr(0, plaintext.size());
+    again_plainText = again_plainText.substr(0, plaintext.size());
+    print("Key", key);
+    print("Plain Text", plaintext);
+    print("Cipher Text", cypherText);
+    print("Decipher Text", again_plainText);
+
+    cout << "Execution Time:\n";
+    cout << fixed << setprecision(15) << "Key Scheduling: " << key_duration.count() / 1000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000.0 << " seconds"
+         << "\n";
+    return 0;
+}
 vector<int> g(vector<int> output, int round)
 {
     // shift
@@ -23,7 +92,6 @@ vector<int> g(vector<int> output, int round)
     output[0] ^= rcon[round];
     return output;
 }
-
 vector<int> Xor(vector<int> a, vector<int> b)
 {
     for (int i = 0; i < n; i++)
@@ -68,7 +136,6 @@ void InverseShiftRows(vector<vector<int>> &v)
         rotate(v[i].begin(), v[i].begin() + (n - i), v[i].end());
     return;
 }
-
 int galois_multiply(const unsigned char &a, const unsigned char &c)
 {
     unsigned char b = c;
@@ -90,7 +157,6 @@ int galois_multiply(const unsigned char &a, const unsigned char &c)
     }
     return result;
 }
-
 auto MultiplyMatrix(vector<vector<int>> &a, vector<vector<int>> &b)
 {
     vector<vector<int>> v(n, vector<int>(n, 0));
@@ -184,58 +250,6 @@ void print(string s, string to_print)
         cout << hex << ((int)(unsigned char)c < 0x10 ? "0" : "") << (int)(unsigned char)c;
     cout << "\n\n";
 }
-int main()
-{
-    initialize();
-    string key;
-    string plaintext, cypherText, again_plainText;
-    getline(cin, key);
-    getline(cin, plaintext);
-    auto start = high_resolution_clock::now();
-    while (key.size() > 16)
-        key.pop_back();
-    while (key.size() < 16)
-        key.push_back('Z');
-    expandKeys(makeState(key));
-    auto stop = high_resolution_clock::now();
-    auto key_duration = duration_cast<microseconds>(stop - start);
-
-    start = high_resolution_clock::now();
-    for (int i = 0; i < plaintext.size(); i += 16)
-    {
-        string tmp_plainText = plaintext.substr(i, min(16, (int)plaintext.size() - i));
-        while (tmp_plainText.size() < 16)
-            tmp_plainText.push_back('Z');
-        cypherText += encrypt(key, tmp_plainText);
-    }
-    stop = high_resolution_clock::now();
-    auto encryption_duration = duration_cast<microseconds>(stop - start);
-
-    start = high_resolution_clock::now();
-    for (int i = 0; i < plaintext.size(); i += 16)
-    {
-        string tmp_cypherText = cypherText.substr(i, min(16, (int)cypherText.size() - i));
-        again_plainText += decrypt(key, tmp_cypherText);
-    }
-    stop = high_resolution_clock::now();
-    auto decryption_duration = duration_cast<microseconds>(stop - start);
-    cypherText = cypherText.substr(0, plaintext.size());
-    again_plainText = again_plainText.substr(0, plaintext.size());
-    print("Key", key);
-    print("Plain Text", plaintext);
-    print("Cipher Text", cypherText);
-    print("Decipher Text", again_plainText);
-
-    cout << "Execution Time:\n";
-    cout << fixed << setprecision(15) << "Key Scheduling: " << key_duration.count() / 1000.0 << " seconds"
-         << "\n";
-    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000.0 << " seconds"
-         << "\n";
-    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000.0 << " seconds"
-         << "\n";
-    return 0;
-}
-
 void initialize()
 {
     rcon = vector<int>{0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};

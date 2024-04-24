@@ -1,15 +1,115 @@
 #include <bits/stdc++.h>
 using namespace std;
 using namespace std::chrono;
-#define ll long long
-ll mul_mod(ll x, ll y, ll m)
+long long mul_mod(long long x, long long y, long long m);
+long long pow_mod(long long x, long long n, long long m);
+bool miller_robin(long long n);
+long long generate_random_prime(long long lower_limit, long long upper_limit);
+pair<long long, long long> generate_primes(int k);
+__int128_t egcd(__int128_t a, __int128_t b, __int128_t &x, __int128_t &y);
+void print(__int128 x);
+string to_string(__int128 x);
+string multiply(const string &num1, const string &num2);
+string subtract(const string &num1, const string &num2);
+int compare(const string &num1, const string &num2);
+string divideByTwo(const string &bigInteger);
+string calc_mod(string a, string m);
+string bigmod(string a, string b, string m);
+
+int main()
 {
-    ll res = __int128(x) * y % m;
+    srand(static_cast<unsigned>(time(nullptr)));
+    int k;
+    cin >> k;
+    auto start = high_resolution_clock::now();
+    auto [p, q] = generate_primes(k);
+    __int128_t n = (__int128_t)p * q;
+    __int128_t phi_n = (__int128_t)(p - 1) * (q - 1);
+    long long low = 1;
+    long long high = min((__int128_t)100000000000000000LL, phi_n);
+    long long e;
+    do
+    {
+        e = generate_random_prime(low, high);
+    } while (phi_n % e == 0);
+
+    __int128_t x, y;
+    egcd(e, phi_n, x, y);
+    __int128_t d = (x % phi_n + phi_n) % phi_n;
+    auto stop = high_resolution_clock::now();
+    auto key_duration = duration_cast<microseconds>(stop - start);
+
+    cout << "Bit Size = " << k << "\n\n";
+    cout << "Public Key:(e,n) = (" << e << ",";
+    print(n);
+    cout << ")\n";
+    cout << "Private Key:(d,n) = (";
+    print(d);
+    cout << ",";
+    print(n);
+    cout << ")\n\n";
+
+    string plainText;
+    cin >> plainText;
+    cout << "Plain Text:\n"
+         << plainText << "\n\n";
+    vector<string> encrypted;
+    // cout << "e = " << e << "\n";
+    string E = to_string(e);
+    // cout << E << "\n";
+    string D = to_string(d);
+    // cout << D << "\n";
+    string N = to_string(n);
+    // cout << N << "\n";
+    // cout << "Here: " << E << " " << D << " " << N << "\n";
+    start = high_resolution_clock::now();
+    for (auto p : plainText)
+    {
+        // cout << p << " ";
+        string P = to_string((int)p);
+        // cout << P << " ";
+        string tmp = bigmod(P, E, N);
+        // cout << tmp << "\n";
+        encrypted.push_back(tmp);
+    }
+    stop = high_resolution_clock::now();
+    auto encryption_duration = duration_cast<microseconds>(stop - start);
+
+    cout << "Encrypted Text(ASCII):\n[";
+    for (int i = 0; i < encrypted.size(); i++)
+        cout << encrypted[i] << ",]"[i == encrypted.size() - 1];
+    cout << "\n\n";
+    string again_plainText;
+    start = high_resolution_clock::now();
+    for (auto c : encrypted)
+    {
+        string P = bigmod(c, D, N);
+        int v = stoi(P);
+        again_plainText += (char)v;
+    }
+    stop = high_resolution_clock::now();
+    auto decryption_duration = duration_cast<microseconds>(stop - start);
+    cout << "Decrypted Text:\n";
+    cout << again_plainText << "\n\n";
+
+    cout << "Execution Time:\n";
+    cout << fixed << setprecision(15) << "Key Generation: " << key_duration.count() / 1000000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000000.0 << " seconds"
+         << "\n";
+    return 0;
+}
+
+long long mul_mod(long long x, long long y, long long m)
+{
+    long long res = __int128(x) * y % m;
     return res;
 }
-ll pow_mod(ll x, ll n, ll m)
+long long pow_mod(long long x, long long n, long long m)
 {
-    ll res = 1 % m;
+    long long res = 1 % m;
     for (; n; n >>= 1)
     {
         if (n & 1)
@@ -18,11 +118,11 @@ ll pow_mod(ll x, ll n, ll m)
     }
     return res;
 }
-bool miller_robin(ll n)
+bool miller_robin(long long n)
 {
     if (n <= 2 || (n & 1 ^ 1))
         return (n == 2);
-    ll c, d, s = 0, r = n - 1;
+    long long c, d, s = 0, r = n - 1;
     for (; !(r & 1); r >>= 1, s++)
     {
     }
@@ -54,7 +154,7 @@ long long generate_random_prime(long long lower_limit, long long upper_limit)
     return random_number;
 }
 
-auto generate_primes(int k)
+pair<long long, long long> generate_primes(int k)
 {
     int num_digits = floor(k / 2 / 3.322 + 1e-9) + 1;
     long long lower_limit = static_cast<long long>(pow(10, num_digits - 1));
@@ -229,89 +329,4 @@ string bigmod(string a, string b, string m)
         temp = calc_mod(temp, m);
     }
     return temp;
-}
-int main()
-{
-    srand(static_cast<unsigned>(time(nullptr)));
-    int k;
-    cin >> k;
-    auto start = high_resolution_clock::now();
-    auto [p, q] = generate_primes(k);
-    __int128_t n = (__int128_t)p * q;
-    __int128_t phi_n = (__int128_t)(p - 1) * (q - 1);
-    long long low = 1;
-    long long high = min((__int128_t)100000000000000000LL, phi_n);
-    long long e;
-    do
-    {
-        e = generate_random_prime(low, high);
-    } while (phi_n % e == 0);
-
-    __int128_t x, y;
-    egcd(e, phi_n, x, y);
-    __int128_t d = (x % phi_n + phi_n) % phi_n;
-    auto stop = high_resolution_clock::now();
-    auto key_duration = duration_cast<microseconds>(stop - start);
-
-    cout << "Bit Size = " << k << "\n\n";
-    cout << "Public Key:(e,n) = (" << e << ",";
-    print(n);
-    cout << ")\n";
-    cout << "Private Key:(d,n) = (";
-    print(d);
-    cout << ",";
-    print(n);
-    cout << ")\n\n";
-
-    string plainText;
-    cin >> plainText;
-    cout << "Plain Text:\n"
-         << plainText << "\n\n";
-    vector<string> encrypted;
-    // cout << "e = " << e << "\n";
-    string E = to_string(e);
-    // cout << E << "\n";
-    string D = to_string(d);
-    // cout << D << "\n";
-    string N = to_string(n);
-    // cout << N << "\n";
-    // cout << "Here: " << E << " " << D << " " << N << "\n";
-    start = high_resolution_clock::now();
-    for (auto p : plainText)
-    {
-        // cout << p << " ";
-        string P = to_string((int)p);
-        // cout << P << " ";
-        string tmp = bigmod(P, E, N);
-        // cout << tmp << "\n";
-        encrypted.push_back(tmp);
-    }
-    stop = high_resolution_clock::now();
-    auto encryption_duration = duration_cast<microseconds>(stop - start);
-
-    cout << "Encrypted Text(ASCII):\n[";
-    for (int i = 0; i < encrypted.size(); i++)
-        cout << encrypted[i] << ",]"[i == encrypted.size() - 1];
-    cout << "\n\n";
-    string again_plainText;
-    start = high_resolution_clock::now();
-    for (auto c : encrypted)
-    {
-        string P = bigmod(c, D, N);
-        int v = stoi(P);
-        again_plainText += (char)v;
-    }
-    stop = high_resolution_clock::now();
-    auto decryption_duration = duration_cast<microseconds>(stop - start);
-    cout << "Decrypted Text:\n";
-    cout << again_plainText << "\n\n";
-
-    cout << "Execution Time:\n";
-    cout << fixed << setprecision(15) << "Key Generation: " << key_duration.count() / 1000000.0 << " seconds"
-         << "\n";
-    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000000.0 << " seconds"
-         << "\n";
-    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000000.0 << " seconds"
-         << "\n";
-    return 0;
 }
