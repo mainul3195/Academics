@@ -233,7 +233,8 @@ string bigmod(string a, string b, string m)
 int main()
 {
     srand(static_cast<unsigned>(time(nullptr)));
-    int k = 96;
+    int k;
+    cin >> k;
     auto start = high_resolution_clock::now();
     auto [p, q] = generate_primes(k);
     __int128_t n = (__int128_t)p * q;
@@ -262,37 +263,55 @@ int main()
     print(n);
     cout << ")\n\n";
 
-    string plainText = "BUETCSEVSSUSTCSE";
+    string plainText;
+    cin >> plainText;
     cout << "Plain Text:\n"
-         << plainText << "\n";
+         << plainText << "\n\n";
     vector<string> encrypted;
-    cout << "e = " << e << "\n";
+    // cout << "e = " << e << "\n";
     string E = to_string(e);
-    cout << E << "\n";
+    // cout << E << "\n";
     string D = to_string(d);
-    cout << D << "\n";
+    // cout << D << "\n";
     string N = to_string(n);
-    cout << N << "\n";
-    cout << "Here: " << E << " " << D << " " << N << "\n";
+    // cout << N << "\n";
+    // cout << "Here: " << E << " " << D << " " << N << "\n";
+    start = high_resolution_clock::now();
     for (auto p : plainText)
     {
-        cout << p << " ";
+        // cout << p << " ";
         string P = to_string((int)p);
-        cout << P << " ";
+        // cout << P << " ";
         string tmp = bigmod(P, E, N);
-        cout << tmp << "\n";
+        // cout << tmp << "\n";
         encrypted.push_back(tmp);
     }
-    for (auto el : encrypted)
-        cout << el << " ";
-    cout << "\n";
+    stop = high_resolution_clock::now();
+    auto encryption_duration = duration_cast<microseconds>(stop - start);
+
+    cout << "Encrypted Text(ASCII):\n[";
+    for (int i = 0; i < encrypted.size(); i++)
+        cout << encrypted[i] << ",]"[i == encrypted.size() - 1];
+    cout << "\n\n";
+    string again_plainText;
+    start = high_resolution_clock::now();
     for (auto c : encrypted)
     {
         string P = bigmod(c, D, N);
         int v = stoi(P);
-        cout << (char)v;
+        again_plainText += (char)v;
     }
-    cout << "\n";
+    stop = high_resolution_clock::now();
+    auto decryption_duration = duration_cast<microseconds>(stop - start);
+    cout << "Decrypted Text:\n";
+    cout << again_plainText << "\n\n";
 
+    cout << "Execution Time:\n";
+    cout << fixed << setprecision(15) << "Key Generation: " << key_duration.count() / 1000000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000000.0 << " seconds"
+         << "\n";
+    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000000.0 << " seconds"
+         << "\n";
     return 0;
 }
