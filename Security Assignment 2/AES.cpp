@@ -99,10 +99,94 @@ auto MultiplyMatrix(vector<vector<int>> &a, vector<vector<int>> &b)
                 v[r][c] ^= galois_multiply(a[r][k], b[k][c]);
     return v;
 }
+void mixCol(vector<vector<int>> &v)
+{
+    v = MultiplyMatrix(Mixer, v);
+    return;
+}
+void inverseMixCol(vector<vector<int>> &v)
+{
+    v = MultiplyMatrix(InverseMixer, v);
+    return;
+}
+vector<vector<int>> makeState(string s)
+{
+    int k = 0;
+    vector<vector<int>> v(n, vector<int>(n));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            v[j][i] = s[k++];
+    return v;
+}
+vector<vector<int>> Xor(vector<vector<int>> a, vector<vector<int>> b)
+{
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            a[i][j] ^= b[i][j];
+    return a;
+}
+void addRoundKey(vector<vector<int>> &v, int round)
+{
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            v[i][j] ^= keys[round * 4 + j][i];
+    return;
+}
+string encrypt(string keyText, string textString)
+{
+    vector<vector<int>> key, plaintext;
+    key = makeState(keyText);
+    plaintext = makeState(textString);
+    vector<vector<int>> cur_state = Xor(plaintext, key);
+
+    for (int round = 1; round <= 10; round++)
+    {
+        subBytes(cur_state);
+        shiftRows(cur_state);
+        if (round != 10)
+            mixCol(cur_state);
+        addRoundKey(cur_state, round);
+    }
+    string cipherText;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            cipherText.push_back((char)cur_state[j][i]);
+    return cipherText;
+}
+string decrypt(string keyText, string textString)
+{
+    vector<vector<int>> key, cyphertext;
+    key = makeState(keyText);
+    cyphertext = makeState(textString);
+    vector<vector<int>> cur_state = cyphertext;
+    addRoundKey(cur_state, 10);
+    for (int round = 9; round >= 0; round--)
+    {
+        InverseShiftRows(cur_state);
+        inverseSubBytes(cur_state);
+        addRoundKey(cur_state, round);
+        if (round)
+            inverseMixCol(cur_state);
+    }
+    string plainText;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            plainText.push_back((char)cur_state[j][i]);
+    return plainText;
+}
 int main()
 {
     initialize();
-    cout << hex << galois_multiply(0x03, 0x2f) << "\n";
+    string key = "Thats my Kung Fu";
+    string plaintext = "Two One Nine Two";
+    expandKeys(makeState(key));
+    cout << decrypt(key, encrypt(key, plaintext)) << "\n";
+    // string cipherText = encrypt(key, plaintext);
+    // cout << cipherText << "\n";
+    // for (auto c : cipherText)
+    //     cout << hex << (int)(unsigned char)c;
+    // cout << "\n";
+
     return 0;
 }
 
