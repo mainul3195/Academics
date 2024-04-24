@@ -181,7 +181,7 @@ void print(string s, string to_print)
     cout << "In ASCII: " << to_print << "\n";
     cout << "In HEX: ";
     for (auto c : to_print)
-        cout << hex << (int)(unsigned char)c;
+        cout << hex << ((int)(unsigned char)c < 0x10 ? "0" : "") << (int)(unsigned char)c;
     cout << "\n\n";
 }
 int main()
@@ -205,7 +205,7 @@ int main()
     {
         string tmp_plainText = plaintext.substr(i, min(16, (int)plaintext.size() - i));
         while (tmp_plainText.size() < 16)
-            tmp_plainText.push_back((char)5);
+            tmp_plainText.push_back('Z');
         cypherText += encrypt(key, tmp_plainText);
     }
     stop = high_resolution_clock::now();
@@ -221,6 +221,7 @@ int main()
     auto decryption_duration = duration_cast<microseconds>(stop - start);
     cypherText = cypherText.substr(0, plaintext.size());
     again_plainText = again_plainText.substr(0, plaintext.size());
+    cout << plaintext.size() << " " << cypherText.size() << " " << again_plainText.size() << "\n";
     print("Key", key);
     print("Plain Text", plaintext);
     print("Cipher Text", cypherText);
