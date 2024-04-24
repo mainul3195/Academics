@@ -221,7 +221,6 @@ int main()
     auto decryption_duration = duration_cast<microseconds>(stop - start);
     cypherText = cypherText.substr(0, plaintext.size());
     again_plainText = again_plainText.substr(0, plaintext.size());
-    cout << plaintext.size() << " " << cypherText.size() << " " << again_plainText.size() << "\n";
     print("Key", key);
     print("Plain Text", plaintext);
     print("Cipher Text", cypherText);
