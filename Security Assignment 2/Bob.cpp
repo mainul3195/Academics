@@ -56,14 +56,12 @@ int main()
         int v = stoi(P);
         key += (char)v;
     }
-    cout << key << "\n";
     expandKeys(makeState(key));
 
     fstream ct("Don't Open This/CT.txt");
     int x;
     while (ct >> x)
         cypherText += (char)x;
-    print("Cipher Text", cypherText);
 
     for (int i = 0; i < cypherText.size(); i += 16)
     {

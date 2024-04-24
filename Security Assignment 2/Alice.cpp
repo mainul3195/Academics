@@ -60,7 +60,7 @@ int main()
     fstream ct("Don't Open This/CT.txt");
     for (auto c : cypherText)
         ct << (int)(unsigned char)c << "\n";
-    print("Cipher Text", cypherText);
+
     int k = 32;
     auto [p, q] = generate_primes(k);
     __int128_t n = (__int128_t)p * q;
@@ -81,28 +81,12 @@ int main()
     string D = to_string(d);
     string N = to_string(n);
 
-    // cout << "Bit Size = " << k << "\n\n";
-    // cout << "Public Key:(e,n) = (" << e << ",";
-    // print(n);
-    // cout << ")\n";
-    // cout << "Private Key:(d,n) = (";
-    // print(d);
-    // cout << ",";
-    // print(n);
-    // cout << ")\n\n";
-
     string plainText = key;
-    // cout << "Plain Text:\n"
-    //      << plainText << "\n\n";
     vector<string> encrypted;
-
     for (auto p : plainText)
     {
-        // cout << p << " ";
         string P = to_string((int)p);
-        // cout << P << " ";
         string tmp = bigmod(P, E, N);
-        // cout << tmp << "\n";
         encrypted.push_back(tmp);
     }
     fstream puk("Don't Open This/PUK.txt");
@@ -114,18 +98,6 @@ int main()
     fstream ek("Don't Open This/EK.txt");
     for (auto cypher : encrypted)
         ek << cypher << "\n";
-
-    // for (int i = 0; i < plaintext.size(); i += 16)
-    // {
-    //     string tmp_cypherText = cypherText.substr(i, min(16, (int)cypherText.size() - i));
-    //     again_plainText += decrypt(key, tmp_cypherText);
-    // }
-    // cypherText = cypherText.substr(0, plaintext.size());
-    // again_plainText = again_plainText.substr(0, plaintext.size());
-    // print("Key", key);
-    // print("Plain Text", plaintext);
-    // print("Cipher Text", cypherText);
-    // print("Decipher Text", again_plainText);
     return 0;
 }
 
