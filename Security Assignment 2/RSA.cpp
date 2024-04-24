@@ -93,6 +93,22 @@ void print(__int128 x)
         print(x / 10);
     putchar(x % 10 + '0');
 }
+string to_string(__int128 x)
+{
+    string s = "";
+    if (x < 0)
+    {
+        s += '-';
+        x = -x;
+    }
+    while (x > 0)
+    {
+        s += (char)(x % 10 + '0');
+        x /= 10;
+    }
+    reverse(s.begin(), s.end());
+    return s;
+}
 
 string multiply(const string &num1, const string &num2)
 {
@@ -250,13 +266,33 @@ int main()
     cout << "Plain Text:\n"
          << plainText << "\n";
     vector<string> encrypted;
+    cout << "e = " << e << "\n";
     string E = to_string(e);
-    // string D = to_string(d);
+    cout << E << "\n";
+    string D = to_string(d);
+    cout << D << "\n";
+    string N = to_string(n);
+    cout << N << "\n";
+    cout << "Here: " << E << " " << D << " " << N << "\n";
     for (auto p : plainText)
     {
+        cout << p << " ";
         string P = to_string((int)p);
-        cout << P << "\n";
+        cout << P << " ";
+        string tmp = bigmod(P, E, N);
+        cout << tmp << "\n";
+        encrypted.push_back(tmp);
     }
+    for (auto el : encrypted)
+        cout << el << " ";
+    cout << "\n";
+    for (auto c : encrypted)
+    {
+        string P = bigmod(c, D, N);
+        int v = stoi(P);
+        cout << (char)v;
+    }
+    cout << "\n";
 
     return 0;
 }
