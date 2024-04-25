@@ -32,13 +32,11 @@ int main()
     {
         e = generate_random_prime(low, high);
     } while (phi_n % e == 0);
-
     __int128_t x, y;
     egcd(e, phi_n, x, y);
     __int128_t d = (x % phi_n + phi_n) % phi_n;
     auto stop = high_resolution_clock::now();
     auto key_duration = duration_cast<microseconds>(stop - start);
-
     cout << "Bit Size = " << k << "\n\n";
     cout << "Public Key:(e,n) = (" << e << ",";
     print(n);
@@ -48,20 +46,14 @@ int main()
     cout << ",";
     print(n);
     cout << ")\n\n";
-
     string plainText;
     cin >> plainText;
     cout << "Plain Text:\n"
          << plainText << "\n\n";
     vector<string> encrypted;
-    // cout << "e = " << e << "\n";
     string E = to_string(e);
-    // cout << E << "\n";
     string D = to_string(d);
-    // cout << D << "\n";
     string N = to_string(n);
-    // cout << N << "\n";
-    // cout << "Here: " << E << " " << D << " " << N << "\n";
     start = high_resolution_clock::now();
     for (auto p : plainText)
     {
