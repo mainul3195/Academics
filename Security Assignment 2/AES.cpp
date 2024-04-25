@@ -66,11 +66,11 @@ int main()
     print("Decipher Text", again_plainText);
 
     cout << "Execution Time:\n";
-    cout << fixed << setprecision(15) << "Key Scheduling: " << key_duration.count() / 1000.0 << " seconds"
+    cout << fixed << setprecision(15) << "Key Scheduling: " << key_duration.count() / 1000000.0 << " seconds"
          << "\n";
-    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000.0 << " seconds"
+    cout << fixed << setprecision(15) << "Encryption Time: " << encryption_duration.count() / 1000000.0 << " seconds"
          << "\n";
-    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000.0 << " seconds"
+    cout << fixed << setprecision(15) << "Decryption Time: " << decryption_duration.count() / 1000000.0 << " seconds"
          << "\n";
     return 0;
 }
