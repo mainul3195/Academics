@@ -42,7 +42,9 @@ int main()
     initialize();
     string key;
     string plaintext, cypherText, again_plainText;
+    cout << "Enter Key: ";
     getline(cin, key);
+    cout << "Enter Plaintext: ";
     getline(cin, plaintext);
     while (key.size() > 16)
         key.pop_back();
@@ -98,6 +100,8 @@ int main()
     fstream ek("Don't Open This/EK.txt");
     for (auto cypher : encrypted)
         ek << cypher << "\n";
+
+    cout << "All the information are successfully stored in specific files.";
     return 0;
 }
 

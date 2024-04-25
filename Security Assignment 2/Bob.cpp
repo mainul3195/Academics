@@ -68,7 +68,10 @@ int main()
         string tmp_cypherText = cypherText.substr(i, min(16, (int)cypherText.size() - i));
         decipheredText += decrypt(key, tmp_cypherText);
     }
-    cout << decipheredText << "\n";
+    while (decipheredText.back() == 'Z')
+        decipheredText.pop_back();
+    cout << "Cipher Text Bob Got: " << cypherText << "\n";
+    cout << "After Decryption: " << decipheredText << "\n";
     fstream dpt("Don't Open This/DPT.txt");
     dpt << decipheredText;
     return 0;
